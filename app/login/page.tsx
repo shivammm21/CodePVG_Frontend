@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { GraduationCap, Shield, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -19,10 +20,13 @@ export default function LoginPage() {
     password: "",
     confirmPassword: "",
     firstName: "",
+    middleName: "",
     lastName: "",
     studentId: "",
     adminCode: "",
     department: "",
+    branch: "",
+    year: "",
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,7 +126,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {authMode === "signup" && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-foreground mb-2 block">First Name</label>
                     <Input
@@ -132,6 +136,16 @@ export default function LoginPage() {
                       onChange={handleInputChange}
                       className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
                       required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-foreground mb-2 block">Middle Name</label>
+                    <Input
+                      name="middleName"
+                      placeholder="A."
+                      value={formData.middleName}
+                      onChange={handleInputChange}
+                      className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
                     />
                   </div>
                   <div>
@@ -148,18 +162,61 @@ export default function LoginPage() {
                 </div>
 
                 {userType === "student" ? (
-                  <div>
-                    <label className="text-sm font-semibold text-foreground mb-2 block">Student ID</label>
-                    <Input
-                      name="studentId"
-                      placeholder="Your college student ID"
-                      value={formData.studentId}
-                      onChange={handleInputChange}
-                      className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">Enter your official college student ID</p>
-                  </div>
+                  <>
+                    <div>
+                      <label className="text-sm font-semibold text-foreground mb-2 block">Student ID</label>
+                      <Input
+                        name="studentId"
+                        placeholder="Your college student ID"
+                        value={formData.studentId}
+                        onChange={handleInputChange}
+                        className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Enter your official college student ID</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-semibold text-foreground mb-2 block">Branch</label>
+                        <Select
+                          value={formData.branch}
+                          onValueChange={(v) =>
+                            setFormData((prev) => ({ ...prev, branch: v }))
+                          }
+                        >
+                          <SelectTrigger className="h-12 rounded-xl border-border/50">
+                            <SelectValue placeholder="Select branch" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CSE">CSE</SelectItem>
+                            <SelectItem value="IT">IT</SelectItem>
+                            <SelectItem value="AIDS">AIDS</SelectItem>
+                            <SelectItem value="ENTC">ENTC</SelectItem>
+                            <SelectItem value="MECH">MECH</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-foreground mb-2 block">Year</label>
+                        <Select
+                          value={formData.year}
+                          onValueChange={(v) =>
+                            setFormData((prev) => ({ ...prev, year: v }))
+                          }
+                        >
+                          <SelectTrigger className="h-12 rounded-xl border-border/50">
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="FE">FE</SelectItem>
+                            <SelectItem value="SE">SE</SelectItem>
+                            <SelectItem value="TE">TE</SelectItem>
+                            <SelectItem value="BE">BE</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <div>
