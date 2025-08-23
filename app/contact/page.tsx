@@ -7,15 +7,12 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Code, Mail, Phone, MapPin, MessageSquare, HelpCircle, Send } from "lucide-react"
-import Link from "next/link"
+import { Mail, Phone, MapPin, MessageSquare, HelpCircle, Send } from "lucide-react"
 import { useState } from "react"
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <Navbar />
 
       {/* Hero Section */}
       <section className="py-20 lg:py-32 bg-gradient-to-br from-accent/5 to-secondary/5">
@@ -42,46 +39,7 @@ export default function ContactPage() {
       <ContactFormSection />
 
       {/* Footer */}
-      <Footer />
     </div>
-  )
-}
-
-function Navbar() {
-  return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <Code className="h-8 w-8 text-accent" />
-              <span className="font-heading text-xl font-bold text-foreground">CodePVG</span>
-            </Link>
-          </div>
-
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              <Link href="/" className="text-muted-foreground hover:text-accent transition-colors">
-                Home
-              </Link>
-              <Link href="/about" className="text-muted-foreground hover:text-accent transition-colors">
-                What is CodePVG
-              </Link>
-              <Link href="/team" className="text-muted-foreground hover:text-accent transition-colors">
-                Team
-              </Link>
-              <Link href="/contact" className="text-foreground hover:text-accent transition-colors">
-                Contact
-              </Link>
-            </div>
-          </div>
-
-          <div className="hidden md:block">
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">Get Started</Button>
-          </div>
-        </div>
-      </div>
-    </nav>
   )
 }
 
@@ -90,24 +48,24 @@ function ContactInfo() {
     {
       icon: <Mail className="h-8 w-8" />,
       title: "Email Us",
-      primary: "contact@codepvg.edu",
-      secondary: "support@codepvg.edu",
+      primary: "mailid",
+      secondary: "mailid",
       description: "Send us an email and we'll respond within 24 hours",
       action: "Send Email",
     },
     {
       icon: <Phone className="h-8 w-8" />,
       title: "Call Us",
-      primary: "+91 98765 43210",
-      secondary: "+91 87654 32109",
+      primary: "+91 8149812710",
+      secondary: "+91 8149812710",
       description: "Call us during business hours for immediate assistance",
       action: "Call Now",
     },
     {
       icon: <MapPin className="h-8 w-8" />,
       title: "Visit Us",
-      primary: "CodePVG Campus",
-      secondary: "Pune, Maharashtra 411001",
+      primary: "PVGCOE & SSDIOM, Nashik",
+      secondary: "Maharashtra 422001",
       description: "Visit our campus for in-person meetings and workshops",
       action: "Get Directions",
     },
@@ -340,91 +298,4 @@ function ContactFormSection() {
   )
 }
 
-function Footer() {
-  return (
-    <footer className="bg-primary text-primary-foreground py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div className="col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <Code className="h-8 w-8 text-accent" />
-              <span className="font-heading text-xl font-bold">CodePVG</span>
-            </div>
-            <p className="text-primary-foreground/80 mb-4 max-w-md">
-              Empowering students to master Data Structures and Algorithms through personalized learning experiences.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-heading font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  What is CodePVG
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/team"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Team
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-heading font-semibold mb-4">Support</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/help"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/docs"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/community"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Community
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
-          <p className="text-primary-foreground/60">© 2024 CodePVG. All rights reserved. Built with ❤️ for students.</p>
-        </div>
-      </div>
-    </footer>
-  )
-}
+// Header and Footer are now provided globally via app/layout.tsx

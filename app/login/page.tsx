@@ -1,59 +1,46 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { GraduationCap, Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import type React from "react"
 
-const DEV_MODE = true; // <-- set false before final commit
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { GraduationCap, Shield, Eye, EyeOff, ArrowLeft } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
 
 export default function LoginPage() {
-  const router = useRouter();
-
-  // switch to "login" if you want sign-in screen by default
-  const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
-  const [userType, setUserType] = useState<"student" | "admin">("student");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [authMode, setAuthMode] = useState<"login" | "signup">("signup")
+  const [userType, setUserType] = useState<"student" | "admin">("student")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
     firstName: "",
+    middleName: "",
     lastName: "",
     studentId: "",
     adminCode: "",
     department: "",
-  });
+    branch: "",
+    year: "",
+  })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // === DEV: Fake authentication ===
-    // This writes a dummy token to localStorage so you can immediately open /dashboard
-    // Replace with real API call to your backend later.
-    if (DEV_MODE) {
-      localStorage.setItem("token", "dummy-token");
-      localStorage.setItem("userType", userType);
-      // Optionally save user info
-      localStorage.setItem("userName", formData.firstName || "Student");
-      router.push("/dashboard");
-      return;
-    }
-
-    // === Production: call backend API ===
-    // fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({email, password}) })
-    //  .then(...)
-  };
+    e.preventDefault()
+    console.log("[v0] Auth form submitted:", { authMode, userType, formData })
+    // Handle authentication logic here
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4 relative overflow-hidden">
@@ -68,6 +55,8 @@ export default function LoginPage() {
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/5 rounded-full blur-3xl animate-pulse"
           style={{ animationDelay: "4s" }}
         />
+
+        {/* Grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.02)_1px,transparent_1px)] bg-[size:50px_50px] opacity-30"></div>
       </div>
 
@@ -137,7 +126,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {authMode === "signup" && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-foreground mb-2 block">First Name</label>
                     <Input
@@ -147,6 +136,16 @@ export default function LoginPage() {
                       onChange={handleInputChange}
                       className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
                       required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-foreground mb-2 block">Middle Name</label>
+                    <Input
+                      name="middleName"
+                      placeholder="A."
+                      value={formData.middleName}
+                      onChange={handleInputChange}
+                      className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
                     />
                   </div>
                   <div>
@@ -163,18 +162,61 @@ export default function LoginPage() {
                 </div>
 
                 {userType === "student" ? (
-                  <div>
-                    <label className="text-sm font-semibold text-foreground mb-2 block">Student ID</label>
-                    <Input
-                      name="studentId"
-                      placeholder="Your college student ID"
-                      value={formData.studentId}
-                      onChange={handleInputChange}
-                      className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">Enter your official college student ID</p>
-                  </div>
+                  <>
+                    <div>
+                      <label className="text-sm font-semibold text-foreground mb-2 block">Student ID</label>
+                      <Input
+                        name="studentId"
+                        placeholder="Your college student ID"
+                        value={formData.studentId}
+                        onChange={handleInputChange}
+                        className="h-12 rounded-xl border-border/50 focus:border-accent transition-colors"
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Enter your official college student ID</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-semibold text-foreground mb-2 block">Branch</label>
+                        <Select
+                          value={formData.branch}
+                          onValueChange={(v) =>
+                            setFormData((prev) => ({ ...prev, branch: v }))
+                          }
+                        >
+                          <SelectTrigger className="h-12 rounded-xl border-border/50">
+                            <SelectValue placeholder="Select branch" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CSE">CSE</SelectItem>
+                            <SelectItem value="IT">IT</SelectItem>
+                            <SelectItem value="AIDS">AIDS</SelectItem>
+                            <SelectItem value="ENTC">ENTC</SelectItem>
+                            <SelectItem value="MECH">MECH</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-foreground mb-2 block">Year</label>
+                        <Select
+                          value={formData.year}
+                          onValueChange={(v) =>
+                            setFormData((prev) => ({ ...prev, year: v }))
+                          }
+                        >
+                          <SelectTrigger className="h-12 rounded-xl border-border/50">
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="FE">FE</SelectItem>
+                            <SelectItem value="SE">SE</SelectItem>
+                            <SelectItem value="TE">TE</SelectItem>
+                            <SelectItem value="BE">BE</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <div>
@@ -240,7 +282,9 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              {authMode === "signup" && <p className="text-xs text-muted-foreground mt-1">Use at least 8 characters with letters and numbers</p>}
+              {authMode === "signup" && (
+                <p className="text-xs text-muted-foreground mt-1">Use at least 8 characters with letters and numbers</p>
+              )}
             </div>
 
             {authMode === "signup" && (
@@ -273,7 +317,9 @@ export default function LoginPage() {
               type="submit"
               className="w-full bg-gradient-to-r from-accent via-accent to-secondary hover:from-accent/90 hover:via-accent/90 hover:to-secondary/90 text-accent-foreground py-4 font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
             >
-              {authMode === "login" ? `Sign In as ${userType === "admin" ? "Admin" : "Student"}` : `Create ${userType === "admin" ? "Admin" : "Student"} Account`}
+              {authMode === "login"
+                ? `Sign In as ${userType === "admin" ? "Admin" : "Student"}`
+                : `Create ${userType === "admin" ? "Admin" : "Student"} Account`}
             </Button>
           </form>
 
@@ -306,5 +352,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

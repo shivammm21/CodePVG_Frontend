@@ -16,7 +16,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Menu,
   ChevronLeft,
   ChevronRight,
   Lightbulb,
@@ -24,14 +23,10 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
-import Image from "next/image"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <Navbar />
 
       {/* Hero Section */}
       <HeroSection />
@@ -48,81 +43,7 @@ export default function HomePage() {
       {/* Contact Section */}
       <ContactSection />
 
-      {/* Footer */}
-      <Footer />
     </div>
-  )
-}
-
-function Navbar() {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-3">
-            <div className="p-1.5 bg-accent/10 rounded-lg">
-              <Image src="/images/codepvg-logo.png" alt="CodePVG Logo" width={32} height={32} className="w-8 h-8" />
-            </div>
-            <span className="font-heading text-xl font-bold">CodePVG</span>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-foreground hover:text-accent transition-colors font-medium">
-              Home
-            </Link>
-            <Link href="/about" className="text-muted-foreground hover:text-accent transition-colors font-medium">
-              What is CodePVG
-            </Link>
-            <Link href="/team" className="text-muted-foreground hover:text-accent transition-colors font-medium">
-              Team
-            </Link>
-            <Link href="/contact" className="text-muted-foreground hover:text-accent transition-colors font-medium">
-              Contact
-            </Link>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
-                Get Started
-              </Button>
-            </Link>
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <div className="flex flex-col space-y-4 mt-8">
-                  <Link href="/" className="text-foreground hover:text-accent transition-colors font-medium">
-                    Home
-                  </Link>
-                  <Link href="/about" className="text-muted-foreground hover:text-accent transition-colors font-medium">
-                    What is CodePVG
-                  </Link>
-                  <Link href="/team" className="text-muted-foreground hover:text-accent transition-colors font-medium">
-                    Team
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="text-muted-foreground hover:text-accent transition-colors font-medium"
-                  >
-                    Contact
-                  </Link>
-                  <Link href="/login">
-                    <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-2 rounded-xl">
-                      Get Started
-                    </Button>
-                  </Link>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </div>
-    </nav>
   )
 }
 
@@ -134,7 +55,7 @@ function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-accent/20 to-secondary/15 rounded-full blur-3xl animate-float"></div>
         <div
@@ -190,8 +111,7 @@ function HeroSection() {
                 </h1>
 
                 <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-2xl leading-relaxed font-light">
-                  Your personalized coding companion designed specifically for students. Track progress, solve
-                  challenges, and excel in competitive programming.
+                Built exclusively for PVGCOE and SSDIOM students, this platform helps you stay consistent, motivated, and ahead in your coding journey. 
                 </p>
               </div>
 
@@ -206,13 +126,6 @@ function HeroSection() {
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-2 border-accent/20 hover:border-accent/40 text-foreground hover:text-accent font-semibold px-8 py-4 rounded-xl transition-all duration-200 bg-transparent"
-                >
-                  View Demo
-                </Button>
               </div>
             </div>
           </div>
@@ -257,11 +170,11 @@ function AboutSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4">
-            About CodePVG
+            Made for PVGCOE, Nashik
           </Badge>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">About CodePVG</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Empowering students with personalized learning experiences in competitive programming
+          Empowering PVGCOE's students with personalized learning in Competitive Programming & DSA.
           </p>
         </div>
 
@@ -269,9 +182,7 @@ function AboutSection() {
           <div>
             <h3 className="text-2xl font-heading font-bold text-foreground mb-6">Built for Students, By Students</h3>
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-              CodePVG is a personalized, self-made platform designed specifically for students who want to excel in Data
-              Structures and Algorithms. Unlike generic platforms, we understand the unique challenges students face in
-              competitive programming.
+            CodePVG is not just another coding platform, it’s a community driven initiative created exclusively for PVGCOE's students. We know the real struggles of learning Data Structures & Algorithms (DSA), from building strong fundamentals to cracking placement level problems. That’s why we designed CodePVG to guide you at every step.
             </p>
             <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
               Our platform combines the best features of LeetCode, HackerRank, and GeeksforGeeks while adding
@@ -349,14 +260,13 @@ function WhyCodePVGSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-3">
-            Why Choose Us
+            Why CodePVG
           </Badge>
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
             Why Choose <span className="text-accent">CodePVG</span>?
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Experience the difference with our student-centric approach to competitive programming education. We've
-            designed every feature with your success in mind.
+            Experience the difference with our student-centric approach to competitive programming education.Unlike generic platforms, CodePVG blends the best of LeetCode, HackerRank, and GeeksforGeeks with unique features tailored for our students
           </p>
         </div>
 
@@ -415,6 +325,7 @@ function WhyCodePVGSection() {
 
 function GallerySection() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [slidesPerView, setSlidesPerView] = useState(1)
   const carouselRef = useRef<HTMLDivElement>(null)
 
   const galleryItems = [
@@ -456,18 +367,33 @@ function GallerySection() {
     },
   ]
 
+  const maxIndex = Math.max(0, galleryItems.length - slidesPerView)
+
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % Math.max(1, galleryItems.length - 2))
+    setCurrentIndex((prev) => (prev + 1) % (maxIndex + 1))
   }
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + Math.max(1, galleryItems.length - 2)) % Math.max(1, galleryItems.length - 2))
+    setCurrentIndex((prev) => (prev - 1 + (maxIndex + 1)) % (maxIndex + 1))
   }
+
+  useEffect(() => {
+    const updateSlides = () => {
+      if (typeof window === "undefined") return
+      const w = window.innerWidth
+      if (w >= 1024) setSlidesPerView(3)
+      else if (w >= 640) setSlidesPerView(2)
+      else setSlidesPerView(1)
+    }
+    updateSlides()
+    window.addEventListener("resize", updateSlides)
+    return () => window.removeEventListener("resize", updateSlides)
+  }, [])
 
   useEffect(() => {
     const interval = setInterval(nextSlide, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [slidesPerView])
 
   return (
     <section className="py-20 bg-muted/30">
@@ -489,16 +415,16 @@ function GallerySection() {
             <div
               ref={carouselRef}
               className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
+              style={{ transform: `translateX(-${currentIndex * (100 / slidesPerView)}%)` }}
             >
               {galleryItems.map((item, index) => (
-                <div key={index} className="w-1/3 flex-shrink-0 px-2">
+                <div key={index} className="w-full sm:w-1/2 lg:w-1/3 flex-shrink-0 px-2">
                   <Card className="overflow-hidden border-border hover:shadow-xl transition-all duration-300 group bg-card/80 backdrop-blur-sm">
                     <div className="relative overflow-hidden">
                       <img
                         src={item.image || "/placeholder.svg"}
                         alt={item.title}
-                        className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-48 sm:h-64 object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-4 left-4">
                         <Badge variant="secondary" className="bg-background/90 text-foreground">
@@ -525,7 +451,7 @@ function GallerySection() {
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+            className="hidden sm:inline-flex absolute left-4 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground transition-all duration-300"
             onClick={prevSlide}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -533,7 +459,7 @@ function GallerySection() {
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground transition-all duration-300"
+            className="hidden sm:inline-flex absolute right-4 top-1/2 -translate-y-1/2 bg-background/90 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground transition-all duration-300"
             onClick={nextSlide}
           >
             <ChevronRight className="h-4 w-4" />
@@ -541,7 +467,7 @@ function GallerySection() {
 
           {/* Carousel Indicators */}
           <div className="flex justify-center mt-6 space-x-2">
-            {Array.from({ length: Math.max(1, galleryItems.length - 2) }).map((_, index) => (
+            {Array.from({ length: maxIndex + 1 }).map((_, index) => (
               <button
                 key={index}
                 className={`w-3 h-3 rounded-full transition-all duration-300 ${
@@ -605,7 +531,7 @@ function ContactSection() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground mb-1">Email Us</p>
-                    <p className="text-muted-foreground">contact@codepvg.edu</p>
+                    <p className="text-muted-foreground">atharva.rahate374@gmail.com</p>
                     <p className="text-sm text-muted-foreground mt-1">We'll respond within 24 hours</p>
                   </div>
                 </div>
@@ -616,8 +542,8 @@ function ContactSection() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground mb-1">Call Us</p>
-                    <p className="text-muted-foreground">+91 98765 43210</p>
-                    <p className="text-sm text-muted-foreground mt-1">Mon-Fri, 9AM-6PM IST</p>
+                    <p className="text-muted-foreground">+91 8149812710</p>
+                    <p className="text-sm text-muted-foreground mt-1">Ready to help 24/7</p>
                   </div>
                 </div>
 
@@ -627,7 +553,7 @@ function ContactSection() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground mb-1">Visit Us</p>
-                    <p className="text-muted-foreground">Pune, Maharashtra</p>
+                    <p className="text-muted-foreground">Nashik, Maharashtra</p>
                     <p className="text-muted-foreground">India</p>
                   </div>
                 </div>
@@ -728,116 +654,5 @@ function ContactSection() {
         </div>
       </div>
     </section>
-  )
-}
-
-function Footer() {
-  return (
-    <footer className="bg-primary text-primary-foreground py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div className="col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <Code className="h-8 w-8 text-accent" />
-              <span className="font-heading text-xl font-bold">CodePVG</span>
-            </div>
-            <p className="text-primary-foreground/80 mb-4 max-w-md">
-              Empowering students to master Data Structures and Algorithms through personalized learning experiences.
-            </p>
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="text-primary-foreground/80 hover:text-primary-foreground">
-                GitHub
-              </Button>
-              <Button variant="ghost" size="sm" className="text-primary-foreground/80 hover:text-primary-foreground">
-                LinkedIn
-              </Button>
-              <Button variant="ghost" size="sm" className="text-primary-foreground/80 hover:text-primary-foreground">
-                Twitter
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="font-heading font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  What is CodePVG
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/team"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Team
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-heading font-semibold mb-4">Resources</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/docs"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/tutorials"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Tutorials
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/blog"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/support"
-                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
-                >
-                  Support
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
-          <p className="text-primary-foreground/60">© 2024 CodePVG. All rights reserved. Built with ❤️ for students.</p>
-        </div>
-      </div>
-    </footer>
   )
 }
