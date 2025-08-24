@@ -169,3 +169,11 @@
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* globals.css */
+.color-empty { fill: #e5e7eb; }
+.color-scale-1 { fill: #86efac; }
+.color-scale-2 { fill: #22c55e; }
+.color-scale-3 { fill: #15803d; }
+.color-scale-4 { fill: #166534; }
+
