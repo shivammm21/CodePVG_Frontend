@@ -3,11 +3,14 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Github, Linkedin, Twitter, Mail, Users, Heart, Target } from "lucide-react"
+import { Code, Github, Linkedin, Twitter, Mail, Users, Heart, Target } from "lucide-react"
+import Link from "next/link"
 
 export default function TeamPage() {
   return (
     <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="py-20 lg:py-32 bg-gradient-to-br from-accent/5 to-secondary/5">
@@ -37,7 +40,46 @@ export default function TeamPage() {
       <DevelopmentTeam />
 
       {/* Footer */}
+      <Footer />
     </div>
+  )
+}
+
+function Navbar() {
+  return (
+    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-2">
+              <Code className="h-8 w-8 text-accent" />
+              <span className="font-heading text-xl font-bold text-foreground">CodePVG</span>
+            </Link>
+          </div>
+
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-8">
+              <Link href="/" className="text-muted-foreground hover:text-accent transition-colors">
+                Home
+              </Link>
+              <Link href="/about" className="text-muted-foreground hover:text-accent transition-colors">
+                What is CodePVG
+              </Link>
+              <Link href="/team" className="text-foreground hover:text-accent transition-colors">
+                Team
+              </Link>
+              <Link href="/contact" className="text-muted-foreground hover:text-accent transition-colors">
+                Contact
+              </Link>
+            </div>
+          </div>
+
+          <div className="hidden md:block">
+            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">Get Started</Button>
+          </div>
+        </div>
+      </div>
+    </nav>
   )
 }
 
@@ -91,34 +133,45 @@ function TeamValues() {
 }
 
 function CoreTeam() {
-  const leadership: Array<{
-    name: string
-    role: string
-    bio: string
-    image: string
-    expertise: string[]
-    social?: { linkedin?: string; email?: string }
-  }> = [
+  const leadership = [
     {
       name: "Dr. Manoj V. Bhalerao",
       role: "Principal",
       bio: "Experienced educator with 15+ years in computer science education. Passionate about innovative learning methodologies and student success.",
-      image: "/Principal.jpeg",
+      image: "/placeholder.svg?height=300&width=300",
+      social: {
+        github: "#",
+        linkedin: "#",
+        twitter: "#",
+        email: "principal@codepvg.edu",
+      },
       expertise: ["Educational Leadership", "Leadership", "Innovation"],
     },
     {
       name: "Prof. Indrajit Sonawane",
       role: "Training & Placement Officer",
       bio: "Senior TPO with expertise in industry connections and student career development. Helps bridge the gap between academia and industry.",
-      image: "/Tpo1.jpeg",
-      expertise: ["Industry Relations", "Student Development"],
+      image: "/placeholder.svg?height=300&width=300",
+      social: {
+        github: "#",
+        linkedin: "#",
+        twitter: "#",
+        email: "tpo1@codepvg.edu",
+      },
+      expertise: ["Career Guidance", "Industry Relations", "Student Development"],
     },
     {
       name: "Prof. Lalit Patil",
       role: "Training & Placement Officer",
       bio: "Dedicated TPO focused on technical skill development and placement preparation. Strong background in competitive programming.",
-      image: "/Tpo2.jpeg",
-      expertise: ["Technical Training", "Placement Strategy"],
+      image: "/placeholder.svg?height=300&width=300",
+      social: {
+        github: "#",
+        linkedin: "#",
+        twitter: "#",
+        email: "tpo2@codepvg.edu",
+      },
+      expertise: ["Technical Training", "Placement Strategy", "Competitive Programming"],
     }
   ]
 
@@ -161,28 +214,18 @@ function CoreTeam() {
                 </div>
 
                 <div className="flex justify-center space-x-3">
-                  {member.social?.linkedin ? (
-                    <Button variant="ghost" size="sm" className="p-2" asChild>
-                      <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer">
-                        <Linkedin className="h-4 w-4" />
-                      </a>
-                    </Button>
-                  ) : (
-                    <Button variant="ghost" size="sm" className="p-2" aria-label="LinkedIn">
-                      <Linkedin className="h-4 w-4" />
-                    </Button>
-                  )}
-                  {member.social?.email ? (
-                    <Button variant="ghost" size="sm" className="p-2" asChild>
-                      <a href={`mailto:${member.social.email}`}>
-                        <Mail className="h-4 w-4" />
-                      </a>
-                    </Button>
-                  ) : (
-                    <Button variant="ghost" size="sm" className="p-2" aria-label="Email">
-                      <Mail className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <Github className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <Linkedin className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <Twitter className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <Mail className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -194,49 +237,27 @@ function CoreTeam() {
 }
 
 function DevelopmentTeam() {
-  const devTeam: Array<{
-    name: string
-    role: string
-    bio: string
-    image: string
-    expertise: string[]
-    social?: { github?: string; linkedin?: string; email?: string; twitter?: string }
-  }> = [
+  const devTeam = [
     {
       name: "Atharva Rahate",
       role: "Frontend & AI Developer",
       bio: "Final Year Computer Engineering Student, specializing in frontend technologies and AI integration. Creates intuitive user experiences and implements intelligent features.",
-      image: "/Atharva.jpg",
-      social: {
-        github: "https://github.com/CrazAr374",
-        linkedin: "https://www.linkedin.com/in/atharva-rahate-272390269/",
-        email: "atharva.rahate374@gmail.com",
-      },
+      image: "/placeholder.svg?height=250&width=250",
       expertise: ["React", "TypeScript", "AI/ML", "Frontend Development"],
     },
     {
       name: "Shivam Thorat",
       role: "Backend Developer",
       bio: "Final Year Computer Engineering Studen, Backend specialist focused on building robust and scalable server-side applications. Ensures smooth data flow and system reliability.",
-      image: "/Shivam.jpeg",
+      image: "/placeholder.svg?height=250&width=250",
       expertise: ["Java SpringBoot", "Database Design", "API Development", "System Architecture"],
-      social: {
-        github: "https://github.com/shivammm21",
-        linkedin: "https://www.linkedin.com/in/shivamthorat/",
-        email: "shivamthorat2103@gmail.com",
-      }
     },
     {
       name: "Rameshwar Bhumbhar",
       role: "FullStack Developer",
-      bio: "Final Year Computer Engineering Student, specializing in FullStack Development focused on building React apps and Java based backend, Creates intuitive user experiences.",
-      image: "/Ram.jpeg",
+      bio: "Final Year Computer Engineering Student, specializing in FullStack Development focused on building React apps and Java based backend applications.",
+      image: "/placeholder.svg?height=250&width=250",
       expertise: ["React", "Java", "Backend", "Frontend Development"],
-      social: {
-        github: "https://github.com/RameshwarB26",
-        linkedin: "https://www.linkedin.com/in/rameshwarbhumbar/",
-        email: "ram26.bhumbar@gmail.com",
-      }
     }
   ]
 
@@ -270,46 +291,13 @@ function DevelopmentTeam() {
               <CardContent className="text-center pt-0">
                 <p className="text-muted-foreground mb-4 leading-relaxed">{member.bio}</p>
 
-                <div className="flex flex-wrap gap-2 justify-center mb-4">
+                <div className="flex flex-wrap gap-2 justify-center">
                   {member.expertise.map((skill, skillIndex) => (
                     <Badge key={skillIndex} variant="secondary" className="text-xs">
                       {skill}
                     </Badge>
                   ))}
                 </div>
-
-                {member.social && (
-                  <div className="flex justify-center gap-3 pt-2">
-                    {member.social.github && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={member.social.github} target="_blank" rel="noopener noreferrer">
-                          <Github className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {member.social.linkedin && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer">
-                          <Linkedin className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {member.social.twitter && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={member.social.twitter} target="_blank" rel="noopener noreferrer">
-                          <Twitter className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    )}
-                    {member.social.email && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={`mailto:${member.social.email}`}>
-                          <Mail className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                )}
               </CardContent>
             </Card>
           ))}
@@ -319,4 +307,91 @@ function DevelopmentTeam() {
   )
 }
 
-// Header and Footer are now provided globally via app/layout.tsx
+function Footer() {
+  return (
+    <footer className="bg-primary text-primary-foreground py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-4 gap-8">
+          <div className="col-span-2">
+            <div className="flex items-center space-x-2 mb-4">
+              <Code className="h-8 w-8 text-accent" />
+              <span className="font-heading text-xl font-bold">CodePVG</span>
+            </div>
+            <p className="text-primary-foreground/80 mb-4 max-w-md">
+              Empowering students to master Data Structures and Algorithms through personalized learning experiences.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-heading font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  What is CodePVG
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/team"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Team
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-heading font-semibold mb-4">Resources</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/docs"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Documentation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/tutorials"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Tutorials
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Blog
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
+          <p className="text-primary-foreground/60">© 2024 CodePVG. All rights reserved. Built with ❤️ for students.</p>
+        </div>
+      </div>
+    </footer>
+  )
+}
