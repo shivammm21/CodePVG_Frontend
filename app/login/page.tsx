@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { GraduationCap, Shield, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup")
@@ -28,6 +29,7 @@ export default function LoginPage() {
     branch: "",
     year: "",
   })
+  const router = useRouter()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -38,8 +40,15 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Auth form submitted:", { authMode, userType, formData })
-    // Handle authentication logic here
+    // Simple client-side redirect based on role
+    if (authMode === 'login') {
+      if (userType === 'admin') router.push('/admin')
+      else router.push('/dashboard')
+    } else {
+      // After signup, route to respective home for demo
+      if (userType === 'admin') router.push('/admin')
+      else router.push('/dashboard')
+    }
   }
 
   return (
