@@ -1,643 +1,575 @@
-"use client";
+'use client'
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Play,
-  Send,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
-  FileCode2,
-  ListChecks,
-  FlaskConical,
-  BookOpen,
-  Shield,
-  Zap,
-  Timer,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
+import React, { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronRight, Play, Send, Code, TestTube, Lightbulb, History, Moon, Sun, Maximize2, Minimize2 } from 'lucide-react'
+import confetti from 'canvas-confetti'
 
-// Lazy-load Monaco so it doesn't bloat first paint
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
+// Monaco Editor dynamic import
+const MonacoEditor = React.lazy(() => import('@monaco-editor/react'))
 
-type LangKey = "cpp" | "c" | "java" | "python" | "javascript";
-const LANGS: Record<LangKey, { label: string; monaco: string; template: string }> = {
-  cpp: {
-    label: "C++",
-    monaco: "cpp",
-    template: `#include <bits/stdc++.h>
+interface TestCase {
+  id: number
+  input: string
+  expected: string
+  yourOutput?: string
+  status?: 'pass' | 'fail' | 'pending'
+  runtime?: string
+}
+
+interface Problem {
+  title: string
+  difficulty: 'Easy' | 'Medium' | 'Hard'
+  acceptanceRate: number
+  timeComplexity: string
+  description: string
+  examples: Array<{
+    input: string
+    output: string
+    explanation: string
+  }>
+  testCases: TestCase[]
+}
+
+const LANGUAGE_TEMPLATES = {
+  'C++': `#include <iostream>
+#include <vector>
 using namespace std;
 
-vector<int> twoSum(vector<int>& nums, int target) {
-  unordered_map<int,int> mp;
-  for (int i = 0; i < nums.size(); ++i) {
-    int need = target - nums[i];
-    if (mp.count(need)) return {mp[need], i};
-    mp[nums[i]] = i;
-  }
-  return {};
-}
-
-int main() {
-  ios::sync_with_stdio(false);
-  cin.tie(nullptr);
-  int n, target; cin >> n >> target;
-  vector<int> a(n); for (int i=0;i<n;i++) cin >> a[i];
-  auto ans = twoSum(a, target);
-  if(ans.size()==2) cout<<ans[0]<<" "<<ans[1]<<endl;
-  else cout<<"-1 -1\\n";
-  return 0;
-}`,
-  },
-  c: {
-    label: "C",
-    monaco: "c",
-    template: `#include <stdio.h>
-
-int main() {
-  // Implement your solution here
-  printf("Hello from C!\\n");
-  return 0;
-}`,
-  },
-  java: {
-    label: "Java",
-    monaco: "java",
-    template: `import java.util.*;
-
-class Main {
-  public static int[] twoSum(int[] nums, int target) {
-    Map<Integer,Integer> map = new HashMap<>();
-    for (int i=0;i<nums.length;i++){
-      int need = target - nums[i];
-      if(map.containsKey(need)) return new int[]{map.get(need), i};
-      map.put(nums[i], i);
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        // Your code here
+        return {};
     }
-    return new int[]{-1,-1};
-  }
-  public static void main(String[] args) {
-    Scanner sc = new Scanner(System.in);
-    int n = sc.nextInt(), t = sc.nextInt();
-    int[] a = new int[n];
-    for(int i=0;i<n;i++) a[i]=sc.nextInt();
-    int[] ans = twoSum(a,t);
-    System.out.println(ans[0] + " " + ans[1]);
-  }
+};`,
+  'Java': `class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Your code here
+        return new int[]{};
+    }
 }`,
-  },
-  python: {
-    label: "Python",
-    monaco: "python",
-    template: `def two_sum(nums, target):
-    mp = {}
-    for i, x in enumerate(nums):
-        need = target - x
-        if need in mp:
-            return [mp[need], i]
-        mp[x] = i
-    return [-1, -1]
-
-if __name__ == "__main__":
-    import sys
-    data = list(map(int, sys.stdin.read().strip().split()))
-    n, target = data[0], data[1]
-    arr = data[2:]
-    print(*two_sum(arr, target))`,
-  },
-  javascript: {
-    label: "JavaScript",
-    monaco: "javascript",
-    template: `function twoSum(nums, target){
-  const mp = new Map();
-  for(let i=0;i<nums.length;i++){
-    const need = target - nums[i];
-    if(mp.has(need)) return [mp.get(need), i];
-    mp.set(nums[i], i);
-  }
-  return [-1, -1];
+  'Python': `class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        # Your code here
+        pass`,
+  'JavaScript': `/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number[]}
+ */
+var twoSum = function(nums, target) {
+    // Your code here
+};`
 }
 
-// Node-style stdin:
-const fs = require('fs');
-const input = fs.readFileSync(0,'utf8').trim().split(/\\s+/).map(Number);
-const n = input[0], target = input[1], arr = input.slice(2);
-console.log(twoSum(arr, target).join(' '));`,
-  },
-};
-
-// mock problem db (slug -> details)
-const PROBLEMS: Record<
-  string,
-  {
-    title: string;
-    difficulty: "Easy" | "Medium" | "Hard";
-    tags: string[];
-    acceptance: number;
-    timeLimit: string;
-    memoryLimit: string;
-    description: string;
-    examples: { input: string; output: string; explain?: string }[];
-    defaultTests: { name: string; input: string; expected: string }[];
-  }
-> = {
-  "two-sum": {
+export default function IDEPage({ params }: { params: { slug: string } }) {
+  const [activeTab, setActiveTab] = useState('description')
+  const [selectedLanguage, setSelectedLanguage] = useState('Python')
+  const [editorTheme, setEditorTheme] = useState('vs-dark')
+  const [code, setCode] = useState(LANGUAGE_TEMPLATES['Python'])
+  const [isRunning, setIsRunning] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const [testResults, setTestResults] = useState<TestCase[]>([])
+  const [leftPanelWidth, setLeftPanelWidth] = useState(45)
+  const [isResizing, setIsResizing] = useState(false)
+  const [runningTestIndex, setRunningTestIndex] = useState(-1)
+  
+  const resizeRef = useRef<HTMLDivElement>(null)
+  
+  // Sample problem data
+  const problem: Problem = {
     title: "Two Sum",
     difficulty: "Easy",
-    tags: ["Array", "Hash Table"],
-    acceptance: 48,
-    timeLimit: "1s",
-    memoryLimit: "256 MB",
-    description:
-      "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
+    acceptanceRate: 49.2,
+    timeComplexity: "O(n)",
+    description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.
+
+**Constraints:**
+- 2 ≤ nums.length ≤ 10⁴
+- -10⁹ ≤ nums[i] ≤ 10⁹
+- -10⁹ ≤ target ≤ 10⁹
+- Only one valid answer exists.
+
+**Follow-up:** Can you come up with an algorithm that is less than O(n²) time complexity?`,
     examples: [
       {
-        input: `n = 4, target = 9
-nums = [2,7,11,15]`,
-        output: `0 1`,
-        explain: "Because nums[0] + nums[1] = 2 + 7 = 9.",
+        input: "nums = [2,7,11,15], target = 9",
+        output: "[0,1]",
+        explanation: "Because nums[0] + nums[1] == 9, we return [0, 1]."
       },
       {
-        input: `n = 3, target = 6
-nums = [3,2,3]`,
-        output: `0 2`,
-      },
-    ],
-    defaultTests: [
-      { name: "Sample #1", input: "4 9\n2 7 11 15\n", expected: "0 1" },
-      { name: "Sample #2", input: "3 6\n3 2 3\n", expected: "0 2" },
-    ],
-  },
-};
-
-function DiffPill({ difficulty }: { difficulty: "Easy" | "Medium" | "Hard" }) {
-  const color =
-    difficulty === "Easy"
-      ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-      : difficulty === "Medium"
-      ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-      : "bg-rose-500/15 text-rose-400 border-rose-500/30";
-  return (
-    <span className={`text-xs px-2 py-1 rounded border ${color}`}>{difficulty}</span>
-  );
-}
-
-export default function IDEPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const router = useRouter();
-  const problem = PROBLEMS[slug ?? "two-sum"] ?? PROBLEMS["two-sum"];
-
-  // UI state
-  const [tab, setTab] = useState<"description" | "tests" | "examples">("description");
-  const [lang, setLang] = useState<LangKey>("cpp");
-  const [theme, setTheme] = useState<"vs-dark" | "light">("vs-dark");
-  const [code, setCode] = useState<string>(LANGS.cpp.template);
-  const [tests, setTests] = useState(problem.defaultTests);
-  const [activeTestIdx, setActiveTestIdx] = useState(0);
-  const [running, setRunning] = useState<"run" | "submit" | null>(null);
-  const [output, setOutput] = useState<string>("");
-  const [progress, setProgress] = useState<number>(0);
-  const editorRef = useRef<any>(null);
-
-  // when language changes, load its starter
-  useEffect(() => {
-    setCode(LANGS[lang].template);
-  }, [lang]);
-
-  // fake execution (frontend only). Backend team will replace this.
-  const simulateRun = (mode: "run" | "submit") => {
-    setRunning(mode);
-    setOutput("");
-    setProgress(0);
-
-    // animated progress bar
-    let p = 0;
-    const iv = setInterval(() => {
-      p = Math.min(100, p + Math.random() * 22);
-      setProgress(p);
-    }, 200);
-
-    // fake result after ~1.6s
-    setTimeout(() => {
-      clearInterval(iv);
-      setProgress(100);
-      // mock check: if code contains 'twoSum' or 'two_sum' -> pass else fail
-      const looksOk = /twoSum|two_sum/.test(code);
-      if (mode === "run") {
-        setOutput(
-          looksOk
-            ? `✅ Ran 1 test — Output matched expected.\n\n${tests[activeTestIdx].expected}`
-            : `❌ Runtime Error: check input parsing or function name.\n\n(Frontend mock)`
-        );
-      } else {
-        const passed = looksOk ? `${tests.length}/${tests.length}` : `0/${tests.length}`;
-        setOutput(
-          looksOk
-            ? `✅ Submitted: All tests passed (${passed}).`
-            : `❌ Submitted: Some tests failed (${passed}).\n\nOpen "Tests" tab to inspect failing cases.`
-        );
+        input: "nums = [3,2,4], target = 6",
+        output: "[1,2]",
+        explanation: "Because nums[1] + nums[2] == 6, we return [1, 2]."
       }
-      setRunning(null);
-    }, 1600);
-  };
+    ],
+    testCases: [
+      { id: 1, input: "[2,7,11,15], 9", expected: "[0,1]" },
+      { id: 2, input: "[3,2,4], 6", expected: "[1,2]" },
+      { id: 3, input: "[3,3], 6", expected: "[0,1]" },
+      { id: 4, input: "[1,2,3,4,5], 9", expected: "[3,4]" },
+      { id: 5, input: "[-1,-2,-3,-4,-5], -8", expected: "[2,4]" }
+    ]
+  }
 
-  // keyboard shortcut: Ctrl/Cmd + Enter => Run
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "enter") {
-        e.preventDefault();
-        if (!running) simulateRun("run");
+    setCode(LANGUAGE_TEMPLATES[selectedLanguage as keyof typeof LANGUAGE_TEMPLATES])
+  }, [selectedLanguage])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsResizing(true)
+    e.preventDefault()
+  }
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return
+      
+      const containerWidth = window.innerWidth
+      const newWidth = (e.clientX / containerWidth) * 100
+      
+      if (newWidth >= 25 && newWidth <= 75) {
+        setLeftPanelWidth(newWidth)
       }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [running, code, tests, activeTestIdx]);
+    }
 
-  const topTabs = [
-    { key: "description", label: "Description", icon: BookOpen },
-    { key: "tests", label: "Test Cases", icon: ListChecks },
-    { key: "examples", label: "Examples", icon: FlaskConical },
-  ] as const;
+    const handleMouseUp = () => {
+      setIsResizing(false)
+    }
 
-  const difficultyGradient =
-    problem.difficulty === "Easy"
-      ? "from-emerald-500/10"
-      : problem.difficulty === "Medium"
-      ? "from-amber-500/10"
-      : "from-rose-500/10";
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
 
-  const passRate = useMemo(() => Math.max(20, Math.min(95, problem.acceptance)), [problem]);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing])
+
+  const runCode = async () => {
+    setIsRunning(true)
+    setShowResults(false)
+    setRunningTestIndex(0)
+    
+    const results = [...problem.testCases]
+    
+    for (let i = 0; i < results.length; i++) {
+      setRunningTestIndex(i)
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      // Simulate test execution
+      const passed = Math.random() > 0.2 // 80% pass rate
+      results[i] = {
+        ...results[i],
+        yourOutput: passed ? results[i].expected : "[1,0]",
+        status: passed ? 'pass' : 'fail',
+        runtime: `${Math.floor(Math.random() * 50 + 10)}ms`
+      }
+    }
+    
+    setTestResults(results)
+    setIsRunning(false)
+    setRunningTestIndex(-1)
+    setShowResults(true)
+  }
+
+  const submitCode = async () => {
+    setIsSubmitting(true)
+    
+    // Simulate submission process
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    setIsSubmitting(false)
+    
+    // Trigger confetti animation
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b']
+    })
+  }
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'text-green-500'
+      case 'Medium': return 'text-yellow-500'
+      case 'Hard': return 'text-red-500'
+      default: return 'text-gray-500'
+    }
+  }
+
+  const tabs = [
+    { id: 'description', label: 'Description', icon: Code },
+    { id: 'testcases', label: 'Test Cases', icon: TestTube },
+    { id: 'examples', label: 'Examples', icon: Lightbulb },
+    { id: 'submissions', label: 'Submissions', icon: History }
+  ]
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Top bar */}
-      <div className="border-b border-border/60 bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/40">
-        <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="p-2 rounded-lg hover:bg-muted/50 border border-border/50"
-            aria-label="Back"
-            title="Back"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-lg font-semibold">{problem.title}</h1>
-              <DiffPill difficulty={problem.difficulty} />
-              <span className="text-xs text-muted-foreground">Acceptance</span>
-              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-accent"
-                  style={{ width: `${passRate}%` }}
-                  aria-label={`Acceptance ${passRate}%`}
-                />
-              </div>
-              <span className="text-xs text-muted-foreground">{passRate}%</span>
-            </div>
-            <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-3">
-              <span className="inline-flex items-center gap-1">
-                <Shield className="w-3.5 h-3.5" /> {problem.timeLimit} time
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Timer className="w-3.5 h-3.5" /> {problem.memoryLimit} memory
-              </span>
-              <div className="hidden md:flex items-center gap-1">
-                {problem.tags.map((t) => (
-                  <span key={t} className="text-[11px] px-2 py-0.5 rounded bg-muted">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {problem.title}
+            </h1>
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(problem.difficulty)}`}>
+              {problem.difficulty}
+            </span>
           </div>
-
-          {/* Lang & theme */}
-          <div className="flex items-center gap-2">
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as LangKey)}
-              className="px-3 py-2 rounded-md border bg-card text-sm"
-              aria-label="Language"
-            >
-              {Object.entries(LANGS).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={theme}
-              onChange={(e) => setTheme(e.target.value as "vs-dark" | "light")}
-              className="px-3 py-2 rounded-md border bg-card text-sm"
-              aria-label="Editor Theme"
-            >
-              <option value="vs-dark">Dark</option>
-              <option value="light">Light</option>
-            </select>
-
-            <button
-              onClick={() => simulateRun("run")}
-              disabled={!!running}
-              className="inline-flex items-center gap-2 bg-secondary/90 hover:bg-secondary text-secondary-foreground px-4 py-2 rounded-md border border-border disabled:opacity-60"
-            >
-              {running === "run" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-              Run
-            </button>
-            <button
-              onClick={() => simulateRun("submit")}
-              disabled={!!running}
-              className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground px-4 py-2 rounded-md border border-border disabled:opacity-60"
-            >
-              {running === "submit" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              Submit
-            </button>
+          <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
+            <span>Acceptance: {problem.acceptanceRate}%</span>
+            <span>Time: {problem.timeComplexity}</span>
           </div>
         </div>
-
-        {/* Progress bar */}
-        <AnimatePresence>
-          {running && (
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              exit={{ width: 0 }}
-              transition={{ ease: "easeOut", duration: 0.2 }}
-              className="h-0.5 bg-accent"
-            />
-          )}
-        </AnimatePresence>
       </div>
 
-      {/* Body: left problem / right editor */}
-      <div className="max-w-[1400px] mx-auto w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-0">
-        {/* LEFT: problem */}
-        <div className="border-r border-border/60 min-h-0">
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel */}
+        <div 
+          className="bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col"
+          style={{ width: `${leftPanelWidth}%` }}
+        >
           {/* Tabs */}
-          <div className={`px-4 py-2 sticky top-0 z-10 bg-gradient-to-b ${difficultyGradient} to-background border-b border-border/60`}>
-            <div className="flex items-center gap-2">
-              {topTabs.map((t) => {
-                const Icon = t.icon;
-                const active = tab === t.key;
-                return (
-                  <button
-                    key={t.key}
-                    onClick={() => setTab(t.key)}
-                    className={`px-3 py-2 rounded-lg text-sm border transition ${
-                      active ? "bg-card shadow-sm" : "hover:bg-muted/60"
-                    }`}
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Icon className="w-4 h-4" />
-                      {t.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex border-b border-gray-200 dark:border-gray-700">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
           </div>
 
-          {/* Tab content */}
-          <div className="p-4 overflow-auto h-[calc(100vh-110px)]">
+          {/* Tab Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-6">
             <AnimatePresence mode="wait">
-              {tab === "description" && (
+              {activeTab === 'description' && (
                 <motion.div
-                  key="desc"
-                  initial={{ opacity: 0, y: 6 }}
+                  key="description"
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18 }}
-                  className="prose prose-invert max-w-none"
+                  exit={{ opacity: 0, y: -20 }}
+                  className="prose dark:prose-invert max-w-none"
                 >
-                  <h2 className="text-lg font-semibold mb-2">Problem</h2>
-                  <p className="leading-7 text-foreground/90">{problem.description}</p>
-                  <h3 className="mt-6 font-semibold">Constraints</h3>
-                  <ul className="list-disc pl-6 text-sm text-muted-foreground">
-                    <li>Time Limit: {problem.timeLimit}</li>
-                    <li>Memory Limit: {problem.memoryLimit}</li>
-                    <li>Exactly one valid answer exists.</li>
-                  </ul>
-                </motion.div>
-              )}
-
-              {tab === "tests" && (
-                <motion.div
-                  key="tests"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18 }}
-                >
-                  {/* Test list header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="font-semibold">Test Cases</div>
-                    <button
-                      onClick={() =>
-                        setTests((t) => [
-                          ...t,
-                          {
-                            name: `Custom #${t.length + 1}`,
-                            input: "4 9\n2 7 11 15\n",
-                            expected: "0 1",
-                          },
-                        ])
-                      }
-                      className="px-3 py-1.5 rounded-md border bg-card text-sm hover:bg-muted/60"
-                    >
-                      + Add
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-3">
-                    {/* test list */}
-                    <div className="col-span-5 border rounded-lg overflow-hidden">
-                      <div className="max-h-[60vh] overflow-auto">
-                        {tests.map((t, i) => {
-                          const active = i === activeTestIdx;
-                          return (
-                            <button
-                              key={i}
-                              onClick={() => setActiveTestIdx(i)}
-                              className={`w-full text-left px-3 py-2 border-b hover:bg-muted/50 ${
-                                active ? "bg-card" : ""
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium">{t.name}</span>
-                                <span className="text-xs text-muted-foreground">stdin / stdout</span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* test editor */}
-                    <div className="col-span-7">
-                      <div className="grid grid-rows-2 gap-3">
-                        <div className="border rounded-lg p-3">
-                          <div className="text-xs text-muted-foreground mb-2">Input</div>
-                          <textarea
-                            value={tests[activeTestIdx]?.input ?? ""}
-                            onChange={(e) => {
-                              const copy = [...tests];
-                              copy[activeTestIdx] = {
-                                ...copy[activeTestIdx],
-                                input: e.target.value,
-                              };
-                              setTests(copy);
-                            }}
-                            className="w-full h-32 bg-transparent outline-none text-sm resize-none"
-                          />
-                        </div>
-                        <div className="border rounded-lg p-3">
-                          <div className="text-xs text-muted-foreground mb-2">Expected Output</div>
-                          <textarea
-                            value={tests[activeTestIdx]?.expected ?? ""}
-                            onChange={(e) => {
-                              const copy = [...tests];
-                              copy[activeTestIdx] = {
-                                ...copy[activeTestIdx],
-                                expected: e.target.value,
-                              };
-                              setTests(copy);
-                            }}
-                            className="w-full h-24 bg-transparent outline-none text-sm resize-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                  <div className="whitespace-pre-line text-gray-700 dark:text-gray-300">
+                    {problem.description}
                   </div>
                 </motion.div>
               )}
 
-              {tab === "examples" && (
+              {activeTab === 'testcases' && (
                 <motion.div
-                  key="ex"
-                  initial={{ opacity: 0, y: 6 }}
+                  key="testcases"
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-4"
                 >
-                  <div className="space-y-4">
-                    {problem.examples.map((ex, idx) => (
-                      <div key={idx} className="border rounded-lg p-3">
-                        <div className="text-sm font-medium mb-1">Example #{idx + 1}</div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <div className="text-xs text-muted-foreground mb-1">Input</div>
-                            <pre className="bg-muted/40 p-2 rounded">{ex.input}</pre>
-                          </div>
-                          <div>
-                            <div className="text-xs text-muted-foreground mb-1">Output</div>
-                            <pre className="bg-muted/40 p-2 rounded">{ex.output}</pre>
-                          </div>
-                        </div>
-                        {ex.explain && (
-                          <p className="text-sm text-muted-foreground mt-2">{ex.explain}</p>
-                        )}
+                  {problem.testCases.map((testCase, index) => (
+                    <div key={testCase.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <div className="font-semibold text-gray-900 dark:text-white mb-2">
+                        Test Case #{index + 1}
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">Input: </span>
+                          <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                            {testCase.input}
+                          </code>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">Expected: </span>
+                          <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                            {testCase.expected}
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+
+              {activeTab === 'examples' && (
+                <motion.div
+                  key="examples"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-6"
+                >
+                  {problem.examples.map((example, index) => (
+                    <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <div className="font-semibold text-gray-900 dark:text-white mb-3">
+                        Example {index + 1}
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">Input: </span>
+                          <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                            {example.input}
+                          </code>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">Output: </span>
+                          <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
+                            {example.output}
+                          </code>
+                        </div>
+                        <div className="text-gray-700 dark:text-gray-300 mt-2">
+                          <span className="text-gray-600 dark:text-gray-400">Explanation: </span>
+                          {example.explanation}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+
+              {activeTab === 'submissions' && (
+                <motion.div
+                  key="submissions"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="text-center py-12"
+                >
+                  <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400">No submissions yet</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                    Your submission history will appear here
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
 
-        {/* RIGHT: editor */}
-        <div className="min-h-0 flex flex-col">
-          <div className="flex-1 min-h-0">
-            <MonacoEditor
-              height="calc(100vh - 170px)"
-              theme={theme}
-              language={LANGS[lang].monaco}
-              value={code}
-              onChange={(v) => setCode(v || "")}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                fontFamily: "ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace",
-                smoothScrolling: true,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 2,
-                cursorBlinking: "expand",
-                roundedSelection: true,
-                renderLineHighlight: "all",
-              }}
-              onMount={(editor) => (editorRef.current = editor)}
-            />
+        {/* Resize Handle */}
+        <div
+          ref={resizeRef}
+          className="w-1 bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 cursor-col-resize transition-colors"
+          onMouseDown={handleMouseDown}
+        />
+
+        {/* Right Panel */}
+        <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900">
+          {/* Editor Header */}
+          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {Object.keys(LANGUAGE_TEMPLATES).map(lang => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => setEditorTheme(editorTheme === 'vs-dark' ? 'light' : 'vs-dark')}
+                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                {editorTheme === 'vs-dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
-          {/* Output / verdict bar */}
-          <div className="border-t border-border/60">
-            <div className="flex items-center justify-between px-4 py-2 bg-card/60">
-              <div className="flex items-center gap-2 text-sm">
-                <Zap className="w-4 h-4 text-accent" />
-                <span className="text-muted-foreground">
-                  Shortcut: <b>Ctrl/Cmd + Enter</b> to Run
-                </span>
+          {/* Monaco Editor */}
+          <div className="flex-1 relative">
+            <React.Suspense fallback={
+              <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800">
+                <div className="text-gray-500">Loading editor...</div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => simulateRun("run")}
-                  disabled={!!running}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border bg-card hover:bg-muted disabled:opacity-60"
-                >
-                  <Play className="w-4 h-4" /> Run
-                </button>
-                <button
-                  onClick={() => simulateRun("submit")}
-                  disabled={!!running}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-60"
-                >
-                  <Send className="w-4 h-4" /> Submit
-                </button>
-              </div>
-            </div>
+            }>
+              <MonacoEditor
+                height="100%"
+                language={selectedLanguage.toLowerCase() === 'c++' ? 'cpp' : selectedLanguage.toLowerCase()}
+                theme={editorTheme}
+                value={code}
+                onChange={(value) => setCode(value || '')}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  smoothScrolling: true,
+                }}
+              />
+            </React.Suspense>
 
-            {/* Verdict strip */}
-            <div className="px-4 py-3 bg-card">
-              <div className="flex items-center gap-3 text-sm">
-                {running ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-muted-foreground">
-                      {running === "run" ? "Running…" : "Submitting…"}
-                    </span>
-                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-accent"
-                        style={{ width: `${progress}%` }}
-                      />
+            {/* Running Overlay */}
+            <AnimatePresence>
+              {isRunning && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10"
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl">
+                    <div className="flex items-center space-x-3">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                      <span className="text-gray-900 dark:text-white">
+                        Running Test Case #{runningTestIndex + 1}...
+                      </span>
                     </div>
-                  </>
-                ) : output ? (
-                  <>
-                    {output.startsWith("✅") ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-rose-500" />
-                    )}
-                    <pre className="whitespace-pre-wrap text-sm">{output}</pre>
-                  </>
-                ) : (
-                  <span className="text-muted-foreground">Output will appear here…</span>
-                )}
-              </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-4">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={runCode}
+                disabled={isRunning || isSubmitting}
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <Play className="w-4 h-4" />
+                <span>{isRunning ? 'Running...' : 'Run'}</span>
+              </button>
+              
+              <button
+                onClick={submitCode}
+                disabled={isRunning || isSubmitting}
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <Send className="w-4 h-4" />
+                <span>{isSubmitting ? 'Submitting...' : 'Submit'}</span>
+              </button>
             </div>
           </div>
+
+          {/* Results Drawer */}
+          <AnimatePresence>
+            {showResults && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 overflow-hidden"
+              >
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Test Results
+                    </h3>
+                    <button
+                      onClick={() => setShowResults(false)}
+                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      <Minimize2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {testResults.map((result, index) => (
+                      <motion.div
+                        key={result.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className={`flex items-center justify-between p-3 rounded-lg ${
+                          result.status === 'pass' 
+                            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className={`text-sm font-medium ${
+                            result.status === 'pass' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
+                          }`}>
+                            Test Case #{index + 1}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            result.status === 'pass' 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                              : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                          }`}>
+                            {result.status === 'pass' ? '✅ Pass' : '❌ Fail'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-4 text-xs text-gray-600 dark:text-gray-400">
+                          <span>Expected: {result.expected}</span>
+                          <span>Got: {result.yourOutput}</span>
+                          <span className="text-blue-600 dark:text-blue-400">{result.runtime}</span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      {/* bottom spacer on mobile */}
-      <div className="h-2 lg:hidden" />
+      {/* Submission Overlay */}
+      <AnimatePresence>
+        {isSubmitting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-2xl max-w-md w-full mx-4"
+            >
+              <div className="text-center">
+                <div className="mb-6">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto"></div>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  🚀 Submitting Solution...
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Running comprehensive tests on your code
+                </p>
+                <div className="mt-4 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <motion.div
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 2.8, ease: 'easeInOut' }}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  );
+  )
 }
