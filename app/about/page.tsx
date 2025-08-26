@@ -11,7 +11,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation - Reusing from main page */}
-      {/* Header provided globally via app/layout.tsx */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="py-20 lg:py-32 bg-gradient-to-br from-accent/5 to-secondary/5">
@@ -24,8 +24,9 @@ export default function AboutPage() {
               What is <span className="text-accent">CodePVG</span>?
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
-            CodePVG is a personalized platform created specifically for PVGCOE and SSDIOM students to master Data Structures and Algorithms (DSA).
-            <br></br> It brings together the strengths of LeetCode, HackerRank, and GeeksforGeeks, but with a student-first approach that makes learning more meaningful, structured, and placement-oriented.
+              CodePVG is a personalized and self-made platform designed specifically for students to master Data
+              Structures and Algorithms, combining the best features of LeetCode, HackerRank, and GeeksforGeeks with a
+              student-centric approach.
             </p>
           </div>
         </div>
@@ -47,12 +48,48 @@ export default function AboutPage() {
       <CallToAction />
 
       {/* Footer */}
-      {/* Footer provided globally via app/layout.tsx */}
+      <Footer />
     </div>
   )
 }
 
-// Local Navbar removed; global Navbar is provided via app/layout.tsx
+function Navbar() {
+  return (
+    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-2">
+              <Code className="h-8 w-8 text-accent" />
+              <span className="font-heading text-xl font-bold text-foreground">CodePVG</span>
+            </Link>
+          </div>
+
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-8">
+              <Link href="/" className="text-muted-foreground hover:text-accent transition-colors">
+                Home
+              </Link>
+              <Link href="/about" className="text-foreground hover:text-accent transition-colors">
+                What is CodePVG
+              </Link>
+              <Link href="/team" className="text-muted-foreground hover:text-accent transition-colors">
+                Team
+              </Link>
+              <Link href="/contact" className="text-muted-foreground hover:text-accent transition-colors">
+                Contact
+              </Link>
+            </div>
+          </div>
+
+          <div className="hidden md:block">
+            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">Get Started</Button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  )
+}
 
 function PlatformOverview() {
   return (
@@ -101,7 +138,7 @@ function PlatformOverview() {
               className="rounded-lg shadow-lg"
             />
             <div className="absolute -bottom-6 -right-6 bg-accent text-accent-foreground p-4 rounded-lg shadow-lg">
-              <div className="text-2xl font-bold">300+</div>
+              <div className="text-2xl font-bold">10,000+</div>
               <div className="text-sm">Students Learning</div>
             </div>
           </div>
@@ -145,7 +182,7 @@ function DifferenceSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">How We're Different</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          While other platforms focus on large problem sets, we focus on quality learning experiences that lead to actual improvement.
+            While other platforms focus on quantity, we focus on quality learning experiences
           </p>
         </div>
 
@@ -475,11 +512,98 @@ function CallToAction() {
           </Button>
         </div>
         <p className="text-sm text-muted-foreground mt-4">
-          Free to start • No credit card required • Join 300+ students
+          Free to start • No credit card required • Join 10,000+ students
         </p>
       </div>
     </section>
   )
 }
 
-// Local Footer removed; global Footer is provided via app/layout.tsx
+function Footer() {
+  return (
+    <footer className="bg-primary text-primary-foreground py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-4 gap-8">
+          <div className="col-span-2">
+            <div className="flex items-center space-x-2 mb-4">
+              <Code className="h-8 w-8 text-accent" />
+              <span className="font-heading text-xl font-bold">CodePVG</span>
+            </div>
+            <p className="text-primary-foreground/80 mb-4 max-w-md">
+              Empowering students to master Data Structures and Algorithms through personalized learning experiences.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-heading font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  What is CodePVG
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/team"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Team
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-heading font-semibold mb-4">Resources</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/docs"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Documentation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/tutorials"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Tutorials
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                >
+                  Blog
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
+          <p className="text-primary-foreground/60">© 2024 CodePVG. All rights reserved. Built with ❤️ for students.</p>
+        </div>
+      </div>
+    </footer>
+  )
+}

@@ -1,41 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { BookOpen } from "lucide-react";
-
-type Profile = { year?: string; branch?: string };
+import Link from "next/link";
 
 export default function ProblemsPage() {
   const [activeTopic, setActiveTopic] = useState("Array");
-  const [assigned, setAssigned] = useState<{ title: string; topic?: string }[]>([]);
-  const [profile, setProfile] = useState<Profile>({});
-
-  useEffect(() => {
-    try {
-      const rawP = localStorage.getItem("codepvg_profile");
-      const p = rawP ? (JSON.parse(rawP) as Profile) : {};
-      setProfile(p);
-      const raw = localStorage.getItem("codepvg_assigned_problems");
-      const all = raw ? (JSON.parse(raw) as any[]) : [];
-      const mine = all.filter((a) => (!p.year || a.year === p.year) && (!p.branch || a.department === p.branch));
-      setAssigned(mine.map((m) => ({ title: m.title, topic: m.topic })));
-    } catch {}
-
-    const onUpdate = () => {
-      // re-run logic
-      try {
-        const rawP = localStorage.getItem("codepvg_profile");
-        const p = rawP ? (JSON.parse(rawP) as Profile) : {};
-        setProfile(p);
-        const raw = localStorage.getItem("codepvg_assigned_problems");
-        const all = raw ? (JSON.parse(raw) as any[]) : [];
-        const mine = all.filter((a) => (!p.year || a.year === p.year) && (!p.branch || a.department === p.branch));
-        setAssigned(mine.map((m) => ({ title: m.title, topic: m.topic })));
-      } catch {}
-    };
-    window.addEventListener("assigned-problems-updated", onUpdate);
-    return () => window.removeEventListener("assigned-problems-updated", onUpdate);
-  }, []);
 
   const topics = [
     "Array",
@@ -63,23 +33,13 @@ export default function ProblemsPage() {
     Backtracking: ["N-Queens", "Sudoku Solver"],
   };
 
+  // helper to slugify problem names
+  const slugify = (text: string) =>
+    text.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-bold">DSA Problems</h1>
-
-      {assigned.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-3">Assigned to you</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {assigned.map((pb, idx) => (
-              <div key={`${pb.title}-${idx}`} className="p-4 rounded-lg bg-card border border-border/60 flex items-center justify-between hover:shadow-md transition">
-                <div className="font-medium">{pb.title}</div>
-                <BookOpen className="text-muted-foreground" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Topics Tabs */}
       <div className="flex flex-wrap gap-3 mb-6">
@@ -101,13 +61,14 @@ export default function ProblemsPage() {
       {/* Problems for Topic */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {problemsForTopic[activeTopic].map((pb) => (
-          <div
+          <Link
             key={pb}
+            href={`/ide/${slugify(pb)}`}
             className="p-4 rounded-lg bg-card border border-border/60 flex items-center justify-between hover:shadow-md transition"
           >
             <div className="font-medium">{pb}</div>
             <BookOpen className="text-muted-foreground" />
-          </div>
+          </Link>
         ))}
       </div>
     </div>
