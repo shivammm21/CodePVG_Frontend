@@ -127,7 +127,9 @@ export default function LoginPage() {
               >
                 <GraduationCap className="h-7 w-7 mx-auto mb-3 group-hover:scale-110 transition-transform duration-200" />
                 <div className="font-semibold text-base">Student</div>
-                <div className="text-xs opacity-75 mt-1">Learn & Practice DSA</div>
+                <div className="text-xs opacity-75 mt-1">
+                  Learn & Practice DSA
+                </div>
               </button>
               <button
                 type="button"
@@ -149,7 +151,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {authMode === "signup" && (
               <>
-                {/* First & Last Name */}
+                {/* Name */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-foreground mb-2 block">
@@ -212,7 +214,7 @@ export default function LoginPage() {
                       />
                     </div>
 
-                    {/* Branch Dropdown */}
+                    {/* Branch */}
                     <div>
                       <label className="text-sm font-semibold text-foreground mb-2 block">
                         Branch
@@ -234,7 +236,7 @@ export default function LoginPage() {
                       </Select>
                     </div>
 
-                    {/* Year Dropdown */}
+                    {/* Year */}
                     <div>
                       <label className="text-sm font-semibold text-foreground mb-2 block">
                         Year
@@ -348,6 +350,42 @@ export default function LoginPage() {
                 : `Create ${userType} Account`}
             </Button>
           </form>
+
+          {/* Forgot Password + Switch Mode */}
+          {authMode === "login" && (
+            <div className="text-center mt-6">
+              <Button
+                variant="link"
+                className="text-sm text-muted-foreground hover:text-accent font-medium"
+              >
+                Forgot your password?
+              </Button>
+            </div>
+          )}
+
+          <div className="mt-8 pt-6 border-t border-border/30 text-center">
+            <p className="text-sm text-muted-foreground">
+              {authMode === "login"
+                ? "Don't have an account?"
+                : "Already have an account?"}
+              <Button
+                variant="link"
+                className="ml-1 p-0 h-auto font-semibold text-accent hover:text-accent/80 transition-colors"
+                onClick={() =>
+                  setAuthMode(authMode === "login" ? "signup" : "login")
+                }
+              >
+                {authMode === "login" ? "Sign up here" : "Sign in here"}
+              </Button>
+            </p>
+
+            {authMode === "signup" && (
+              <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                By creating an account, you agree to our Terms of Service and
+                Privacy Policy
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
