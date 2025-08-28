@@ -14,11 +14,13 @@ import {
 import { GraduationCap, Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const DEV_MODE = false; // <-- set false before final commit
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
   const [userType, setUserType] = useState<"student" | "admin">("student");
@@ -172,24 +174,31 @@ export default function LoginPage() {
           localStorage.setItem("userId", result.user.id);
           localStorage.setItem("userEmail", result.user.email);
 
-          // Redirect based on user role
+          // Store role-specific data
           if (result.user.role === "ADMIN") {
-            // Store admin-specific data
             localStorage.setItem("userDepartment", result.user.department || "");
             localStorage.setItem("userUsername", result.user.username);
             localStorage.setItem("totalSolved", result.user.totalSolved?.toString() || "0");
             localStorage.setItem("totalSubmissions", result.user.totalSubmissions?.toString() || "0");
-            router.push("/admin");
           } else {
-            // Store student-specific data
             localStorage.setItem("userBranch", result.user.branch || "");
             localStorage.setItem("userYear", result.user.year || "");
             localStorage.setItem("userPRN", result.user.prnNumber || "");
             localStorage.setItem("userUsername", result.user.username || "");
             localStorage.setItem("totalSolved", result.user.totalSolved?.toString() || "0");
             localStorage.setItem("totalSubmissions", result.user.totalSubmissions?.toString() || "0");
-            router.push("/dashboard");
           }
+
+          // Update auth context
+          login({
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.fullName,
+            type: result.user.role.toLowerCase() as "student" | "admin",
+            token: result.token,
+          });
+
+          // AuthProvider will handle the redirect
         } else {
           const errorData = await response.json();
           console.error("Login failed:", errorData);

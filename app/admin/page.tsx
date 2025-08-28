@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, BarChart3, FolderPlus, Trash2 } from "lucide-react";
+import { Upload, BarChart3, FolderPlus, Trash2, LogOut, User } from "lucide-react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Button } from "@/components/ui/button";
 
 // Types
 type Problem = {
@@ -40,8 +43,9 @@ type StudentProject = {
 const YEAR_OPTIONS = ["First Year", "Second Year", "Third Year", "Final Year"];
 const DEPT_OPTIONS = ["CSE", "IT", "ECE", "EEE", "MECH"];
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const [dataset, setDataset] = useState<Problem[]>([]);
   const [assignYear, setAssignYear] = useState<string>(YEAR_OPTIONS[0]);
   const [assignDept, setAssignDept] = useState<string>(DEPT_OPTIONS[0]);
@@ -319,8 +323,27 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-10">
-      <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+    <div className="space-y-10 p-8">
+      {/* Header with user info and logout */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-secondary/10">
+            <User className="w-6 h-6 text-secondary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Welcome back, {user?.name}</p>
+          </div>
+        </div>
+        <Button
+          onClick={logout}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </Button>
+      </div>
 
       {/* Progress Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -529,5 +552,13 @@ export default function AdminDashboard() {
 
       {/* Departmental Rankings moved to dedicated page */}
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <ProtectedRoute requiredRole="admin">
+      <AdminDashboardContent />
+    </ProtectedRoute>
   );
 }
