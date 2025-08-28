@@ -77,11 +77,11 @@ export default function AdminDashboard() {
     try {
       const raw = localStorage.getItem("codepvg_problems_dataset");
       if (raw) setDataset(JSON.parse(raw));
-    } catch {}
+    } catch { }
     try {
       const rawProj = localStorage.getItem("codepvg_student_projects");
       if (rawProj) setProjects(JSON.parse(rawProj));
-    } catch {}
+    } catch { }
   }, []);
 
   const toggleSelect = (id: string) =>
@@ -209,13 +209,13 @@ export default function AdminDashboard() {
         const parsed = JSON.parse(text);
         data = Array.isArray(parsed)
           ? parsed.map((p: any, idx: number) => ({
-              id: p.id || String(idx + 1),
-              title: p.title || `Problem ${idx + 1}`,
-              topic: p.topic,
-              difficulty: p.difficulty,
-              year: normalizeYear(p.year) || undefined,
-              department: normalizeDept(p.department) || undefined,
-            }))
+            id: p.id || String(idx + 1),
+            title: p.title || `Problem ${idx + 1}`,
+            topic: p.topic,
+            difficulty: p.difficulty,
+            year: normalizeYear(p.year) || undefined,
+            department: normalizeDept(p.department) || undefined,
+          }))
           : [];
       } else if (file.name.endsWith(".csv")) {
         // CSV with header support. Expected headers (any order): id,title,topic,difficulty,year,department
