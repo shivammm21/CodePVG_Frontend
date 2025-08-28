@@ -138,6 +138,78 @@ export default function LoginPage() {
       }
     }
 
+    // API Integration for login
+    if (authMode === "login") {
+      try {
+        // Validate required fields for login
+        if (!formData.email || !formData.password) {
+          setError("Please enter both email and password");
+          setIsLoading(false);
+          return;
+        }
+
+        const loginData = {
+          email: formData.email,
+          password: formData.password
+        };
+
+        const response = await fetch("http://localhost:4545/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(loginData),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log("Login successful:", result);
+
+          // Store user data from login response
+          localStorage.setItem("token", result.token);
+          localStorage.setItem("userType", result.user.role.toLowerCase());
+          localStorage.setItem("userName", result.user.fullName);
+          localStorage.setItem("userId", result.user.id);
+          localStorage.setItem("userEmail", result.user.email);
+
+          // Redirect based on user role
+          if (result.user.role === "ADMIN") {
+            // Store admin-specific data
+            localStorage.setItem("userDepartment", result.user.department || "");
+            localStorage.setItem("userUsername", result.user.username);
+            localStorage.setItem("totalSolved", result.user.totalSolved?.toString() || "0");
+            localStorage.setItem("totalSubmissions", result.user.totalSubmissions?.toString() || "0");
+            router.push("/admin");
+          } else {
+            // Store student-specific data
+            localStorage.setItem("userBranch", result.user.branch || "");
+            localStorage.setItem("userYear", result.user.year || "");
+            localStorage.setItem("userPRN", result.user.prnNumber || "");
+            localStorage.setItem("userUsername", result.user.username || "");
+            localStorage.setItem("totalSolved", result.user.totalSolved?.toString() || "0");
+            localStorage.setItem("totalSubmissions", result.user.totalSubmissions?.toString() || "0");
+            router.push("/dashboard");
+          }
+        } else {
+          const errorData = await response.json();
+          console.error("Login failed:", errorData);
+          
+          // Check if account is not approved yet
+          if (errorData.error === "Account not approved yet. Please wait for admin approval.") {
+            // Store pending user data and redirect to pending page
+            localStorage.setItem("pendingUserEmail", formData.email);
+            localStorage.setItem("pendingUserName", "Student"); // We don't have the name from login
+            router.push("/pending");
+          } else {
+            setError(errorData.error || errorData.message || "Login failed. Please try again.");
+          }
+        }
+      } catch (error) {
+        console.error("Network error:", error);
+        setError("Network error. Please check if the server is running on localhost:4545");
+      }
+    }
+
     // API Integration for admin registration
     if (authMode === "signup" && userType === "admin") {
       try {
