@@ -28,6 +28,8 @@ type ProblemItem = {
   frequency?: number;
 };
 
+
+
 const ALL_PROBLEMS: ProblemItem[] = [
   { id: 1, title: "Two Sum", difficulty: "Easy", tags: ["Array", "Hash Table"], solved: true, acceptance: 56.2, year: "First Year" },
   { id: 2, title: "Add Two Numbers", difficulty: "Medium", tags: ["Linked List", "Math"], solved: true, acceptance: 46.8, year: "First Year" },
